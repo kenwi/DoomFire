@@ -102,8 +102,8 @@ namespace DoomFire
                 int red = rawPalleteRGB[3 * i + 2];
                 int green = rawPalleteRGB[3 * i + 1];
                 int blue = rawPalleteRGB[3 * i + 0];
-                int rgba = ( alpha << 24) + (red << 16) + ( green << 8) + blue;
-                pallette[i] = rgba;
+                int argb = (alpha << 24) + (red << 16) + (green << 8) + blue;
+                pallette[i] = argb;
             }
         }
 
