@@ -6,9 +6,8 @@ namespace DoomFire
 {
     public class DoomFireEffect : Effect
     {
-        // https://github.com/chriswhocodes/DoomFire/blob/master/src/main/java/com/chrisnewland/javafx/doomfire/DoomFire.java
-        int imageWidth;
-        int imageHeight;
+        int width;
+        int height;
         int[] palletteReferences;
         int[] pallette;
         int[] pixelData;
@@ -19,28 +18,27 @@ namespace DoomFire
 
         public DoomFireEffect() : base("DoomFireEffect")
         {
-            imageWidth = (int)Game.Instance.Window.Size.X;
-            imageHeight = (int)Game.Instance.Window.Size.Y;
+            width = (int)Game.Instance.Window.Size.X;
+            height = (int)Game.Instance.Window.Size.Y;
 
-            int pixelCount = imageWidth * imageHeight;
+            int pixelCount = width * height;
             palletteReferences = new int[pixelCount];
             pixelData = new int[pixelCount];
             imageBytes = new byte[pixelData.Length * sizeof(int)];
-            createPallete();
-            intializePalleteRefs();
+            createPallette();
+            intializePalletteRefs();
 
             texture = new Texture(Game.Instance.Window.Size.X, Game.Instance.Window.Size.Y);
             sprite = new Sprite(texture);
         }
 
-        private void intializePalleteRefs()
+        private void intializePalletteRefs()
         {
-            int writeIndex = 0;
-            for (int y = 0; y < imageHeight; y++)
+            for (int y = 0, writeIndex = 0; y < height; y++)
             {
-                for (int x = 0; x < imageWidth; x++)
+                for (int x = 0; x < width; x++)
                 {
-                    if (y == imageHeight - 1)
+                    if (y == height - 1)
                     {
                         palletteReferences[writeIndex++] = pallette.Length - 1;
                     }
@@ -52,7 +50,7 @@ namespace DoomFire
             }
         }
 
-        private void createPallete()
+        private void createPallette()
         {
             int[] rawPalleteRGB = new int[] {
                 0x07,0x07,0x07,
@@ -99,9 +97,9 @@ namespace DoomFire
             for (int i = 0; i < palleteSize; i++)
             {
                 int alpha = (i == 0) ? 0 : 255;
-                int red = rawPalleteRGB[3 * i + 2];
-                int green = rawPalleteRGB[3 * i + 1];
                 int blue = rawPalleteRGB[3 * i + 0];
+                int green = rawPalleteRGB[3 * i + 1];
+                int red = rawPalleteRGB[3 * i + 2];
                 int argb = (alpha << 24) + (red << 16) + (green << 8) + blue;
                 pallette[i] = argb;
             }
@@ -109,32 +107,28 @@ namespace DoomFire
 
         protected override void OnDraw(RenderTarget target, RenderStates states)
         {
-            writeFireImage();
+            updateTexture();
+            target.Draw(sprite, states);
+            System.Threading.Thread.Sleep(1000 / 60);
+        }
+
+        private void updateTexture()
+        {
+            for (int i = 0; i < height * width; pixelData[i] = pallette[palletteReferences[i++]]) ;
             Buffer.BlockCopy(pixelData, 0, imageBytes, 0, imageBytes.Length);
             texture.Update(imageBytes);
-            target.Draw(sprite, states);
         }
 
         private void spreadFire(int src)
         {
             int rand = (int)Math.Round(Game.Instance.Random.NextDouble() * 3.0) & 3;
             int dst = src - rand + 1;
-            palletteReferences[Math.Max(0, dst - imageWidth)] = Math.Max(0, palletteReferences[src] - (rand & 1));
-        }
-
-        private void writeFireImage()
-        {
-            for (int i = 0; i < imageHeight * imageWidth; i++)
-            {
-                var pixelColorIndex = palletteReferences[i];
-                var pixelValue = pallette[pixelColorIndex];
-                pixelData[i] = pixelValue;
-            }
+            palletteReferences[Math.Max(0, dst - width)] = Math.Max(0, palletteReferences[src] - (rand & 1));
         }
 
         protected override void OnUpdate(float time)
         {
-            for (int i = 0; i < imageWidth * imageHeight; spreadFire(i++));
+            for (int i = 0; i < width * height; spreadFire(i++)) ;
         }
     }
 }
