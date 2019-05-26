@@ -124,28 +124,17 @@ namespace DoomFire
 
         private void writeFireImage()
         {
-            int pos = 0;
-            for (int y = 0; y < imageHeight; y++)
+            for (int i = 0; i < imageHeight * imageWidth; i++)
             {
-                for (int x = 0; x < imageWidth; x++)
-                {
-                    var pixelColorIndex = palletteReferences[pos];
-                    var pixelValue = pallette[pixelColorIndex];
-                    pixelData[pos] = pixelValue;
-                    pos++;
-                }
+                var pixelColorIndex = palletteReferences[i];
+                var pixelValue = pallette[pixelColorIndex];
+                pixelData[i] = pixelValue;
             }
         }
 
         protected override void OnUpdate(float time)
         {
-            for (int x = 0; x < imageWidth; x++)
-            {
-                for (int y = 1; y < imageHeight; y++)
-                {
-                    spreadFire(y * imageWidth + x);
-                }
-            }
+            for (int i = 0; i < imageWidth * imageHeight; spreadFire(i++));
         }
     }
 }
