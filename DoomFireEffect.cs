@@ -6,6 +6,7 @@ namespace DoomFire
 {
     public class DoomFireEffect : Effect
     {
+        // https://github.com/chriswhocodes/DoomFire/blob/master/src/main/java/com/chrisnewland/javafx/doomfire/DoomFire.java
         int imageWidth;
         int imageHeight;
         int[] palletteReferences;
