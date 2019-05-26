@@ -20,8 +20,9 @@ namespace DoomFire
         {
             Random = new Random();
             gameTime = new Clock();
-            window = new RenderWindow(new VideoMode(800, 600), "DoomFire");
+            window = new RenderWindow(new VideoMode(1024, 224), "DoomFire");
             effects = new Effect[]{
+                new DoomFireEffect()
             };
         }
 
@@ -37,7 +38,7 @@ namespace DoomFire
         {
             foreach (var effect in effects)
             {
-                effect.Update(gameTime.ElapsedTime.AsSeconds(), MousePositionNormalized.X, MousePositionNormalized.Y);
+                effect.Update(gameTime.ElapsedTime.AsSeconds());
             }
         }
     }
