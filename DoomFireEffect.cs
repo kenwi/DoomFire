@@ -8,8 +8,8 @@ namespace DoomFire
     {
         int width;
         int height;
-        int[] palletteReferences;
-        int[] pallette;
+        int[] paletteReferences;
+        int[] palette;
         int[] pixelData;
         byte[] imageBytes;
 
@@ -22,17 +22,17 @@ namespace DoomFire
             height = (int)Game.Instance.Window.Size.Y;
 
             int pixelCount = width * height;
-            palletteReferences = new int[pixelCount];
+            paletteReferences = new int[pixelCount];
             pixelData = new int[pixelCount];
             imageBytes = new byte[pixelData.Length * sizeof(int)];
-            createPallette();
-            intializePalletteRefs();
+            createpalette();
+            intializepaletteRefs();
 
             texture = new Texture(Game.Instance.Window.Size.X, Game.Instance.Window.Size.Y);
             sprite = new Sprite(texture);
         }
 
-        private void intializePalletteRefs()
+        private void intializepaletteRefs()
         {
             for (int y = 0, writeIndex = 0; y < height; y++)
             {
@@ -40,17 +40,17 @@ namespace DoomFire
                 {
                     if (y == height - 1)
                     {
-                        palletteReferences[writeIndex++] = pallette.Length - 1;
+                        paletteReferences[writeIndex++] = palette.Length - 1;
                     }
                     else
                     {
-                        palletteReferences[writeIndex++] = 0;
+                        paletteReferences[writeIndex++] = 0;
                     }
                 }
             }
         }
 
-        private void createPallette()
+        private void createpalette()
         {
             byte[] rgb = new byte[] {
                 0x07,0x07,0x07,
@@ -91,16 +91,16 @@ namespace DoomFire
                 0xEF,0xEF,0xC7,
                 0xFF,0xFF,0xFF
             };
-            int palleteSize = rgb.Length / 3;
-            pallette = new int[palleteSize];
-            for (int i = 0; i < palleteSize; i++)
+
+            int paletteSize = rgb.Length / 3;
+            palette = new int[paletteSize];
+            for (int i = 0; i < paletteSize; i++)
             {
-                byte alpha = (i == 0) ? (byte)0x00 : (byte)0xFF;
-                byte red = rgb[3 * i + 0];
-                byte green = rgb[3 * i + 2];
-                byte blue = rgb[3 * i + 1];
-                var color = new Color(red, green, blue, alpha);
-                pallette[i] = (int)color.ToInteger();
+                int alpha = (i == 0) ? 0 : 255;
+                int red = rgb[3 * i + 0];
+                int green = rgb[3 * i + 1];
+                int blue = rgb[3 * i + 2];
+                palette[i] = (red << 24) + (blue << 16) + (green << 8) + alpha;
             }
         }
 
@@ -113,7 +113,7 @@ namespace DoomFire
 
         private void updateTexture()
         {
-            for (int i = 0; i < height * width; pixelData[i] = pallette[palletteReferences[i++]]) ;
+            for (int i = 0; i < height * width; pixelData[i] = palette[paletteReferences[i++]]) ;
             Buffer.BlockCopy(pixelData, 0, imageBytes, 0, imageBytes.Length);
             texture.Update(imageBytes);
         }
@@ -122,7 +122,7 @@ namespace DoomFire
         {
             int rand = (int)Math.Round(Game.Instance.Random.NextDouble() * 3.0) & 3;
             int dst = src - rand + 1;
-            palletteReferences[Math.Max(0, dst - width)] = Math.Max(0, palletteReferences[src] - (rand & 1));
+            paletteReferences[Math.Max(0, dst - width)] = Math.Max(0, paletteReferences[src] - (rand & 1));
         }
 
         protected override void OnUpdate(float time)
