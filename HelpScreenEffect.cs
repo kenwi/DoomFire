@@ -1,4 +1,5 @@
 using SFML.Graphics;
+using SFML.System;
 using SFML.Window;
 
 namespace DoomFire
@@ -7,11 +8,13 @@ namespace DoomFire
     {
         Text text;
         Font font;
+        Clock clock;
         int duration = 5;
         public bool Visible { get; set; } = true;
 
         public HelpScreenEffect() : base("HelpScreenEffect")
         {
+            clock = new Clock();
             font = new Font("cour.ttf");
             text = new Text("[H] Toggle help\n[Up/Down] Adjust alpha\n[Left/Right] Cycle palette\n[Escape] Quit", font, 15);
         }
@@ -26,8 +29,11 @@ namespace DoomFire
 
         protected override void OnUpdate(float time)
         {
-            if (Game.Instance.GameTime.ElapsedTime.AsSeconds() > duration)
+            if (clock?.ElapsedTime.AsSeconds() > duration)
+            {
                 Visible = false;
+                clock = null;
+            }
         }
     }
 }
