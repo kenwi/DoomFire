@@ -7,14 +7,13 @@ namespace DoomFire
     {
         Text text;
         Font font;
-        int duration = 3;
+        int duration = 5;
         public bool Visible { get; set; } = true;
 
-        public HelpScreenEffect(int duration) : base("HelpScreenEffect")
+        public HelpScreenEffect() : base("HelpScreenEffect")
         {
-            this.duration = duration;
             font = new Font("cour.ttf");
-            text = new Text("[H] Toggle help\n[Up/Down] Adjust alpha\n[Left/Right] Cycle palette\n[Escape] Quit", font, 18);
+            text = new Text("[H] Toggle help\n[Up/Down] Adjust alpha\n[Left/Right] Cycle palette\n[Escape] Quit", font, 15);
         }
 
         protected override void OnDraw(RenderTarget target, RenderStates states)
