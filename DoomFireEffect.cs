@@ -52,7 +52,7 @@ namespace DoomFire
 
         private void createPallette()
         {
-            int[] rawPalleteRGB = new int[] {
+            byte[] rgb = new byte[] {
                 0x07,0x07,0x07,
                 0x1F,0x07,0x07,
                 0x2F,0x0F,0x07,
@@ -91,17 +91,16 @@ namespace DoomFire
                 0xEF,0xEF,0xC7,
                 0xFF,0xFF,0xFF
             };
-            int palleteSize = rawPalleteRGB.Length / 3;
+            int palleteSize = rgb.Length / 3;
             pallette = new int[palleteSize];
-
             for (int i = 0; i < palleteSize; i++)
             {
-                int alpha = (i == 0) ? 0 : 255;
-                int blue = rawPalleteRGB[3 * i + 0];
-                int green = rawPalleteRGB[3 * i + 1];
-                int red = rawPalleteRGB[3 * i + 2];
-                int argb = (alpha << 24) + (red << 16) + (green << 8) + blue;
-                pallette[i] = argb;
+                byte alpha = (i == 0) ? (byte)0x00 : (byte)0xFF;
+                byte red = rgb[3 * i + 0];
+                byte green = rgb[3 * i + 2];
+                byte blue = rgb[3 * i + 1];
+                var color = new Color(red, green, blue, alpha);
+                pallette[i] = (int)color.ToInteger();
             }
         }
 
