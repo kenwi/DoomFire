@@ -1,4 +1,5 @@
-﻿using SFML.System;
+﻿using System;
+using SFML.System;
 
 namespace DoomFire
 {
@@ -6,10 +7,19 @@ namespace DoomFire
     {
         static void Main(string[] args)
         {
+            int targetfps = 10;
+            float targetUpdateRate = 1f / targetfps;
+
             Game.Instance.Init();
             InputHandler.Instance.Init();
             while (Game.Instance.Window.IsOpen)
             {
+                var dt = Game.Instance.DeltaTime;
+                while (dt < targetUpdateRate)
+                {
+                    dt += Game.Instance.DeltaTime;
+                    System.Threading.Thread.Sleep((int)dt * 1000);
+                }
                 InputHandler.Instance.Update();
                 Game.Instance.Update();
                 Game.Instance.Render();
