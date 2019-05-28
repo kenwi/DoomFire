@@ -108,7 +108,6 @@ namespace DoomFire
         {
             updateTexture();
             target.Draw(sprite, states);
-            System.Threading.Thread.Sleep(1000 / 60);
         }
 
         private void updateTexture()
@@ -127,7 +126,7 @@ namespace DoomFire
 
         protected override void OnUpdate(float time)
         {
-            for (int i = 0; i < width * height; spreadFire(i++)) ;
+           for (int i = 0; i < width * height; spreadFire(i++)) ;
         }
     }
 }
