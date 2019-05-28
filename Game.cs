@@ -32,7 +32,7 @@ namespace DoomFire
             };
         }
 
-        public float calculateDt()
+        private float calculateDt()
         {
             var current = GameTime.ElapsedTime;
             var dt = current - previousTime;
