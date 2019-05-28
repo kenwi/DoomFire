@@ -18,7 +18,7 @@ namespace DoomFire
                 while (dt < targetUpdateRate)
                 {
                     dt += Game.Instance.DeltaTime;
-                    System.Threading.Thread.Sleep((int)dt * 1000);
+                    System.Threading.Thread.Sleep(1000 / 60);
                 }
                 InputHandler.Instance.Update();
                 Game.Instance.Update();
