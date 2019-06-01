@@ -1,43 +1,60 @@
 using System;
 using SFML.Graphics;
+using System.Numerics;
 
 namespace DoomFire
 {
     public class MapEffect : Effect
     {
+        byte[] map ={
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+            1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        };
+
+        byte[] palette = {
+            0xFF, 0x77, 0x00,
+            0xAB, 0xBB, 0xBB
+        };
+
+        int SquareMapSize => (int)Math.Sqrt(map.Length);
+        int width => (int)Game.Instance.Window.Size.X;
+        int height => (int)Game.Instance.Window.Size.Y;
         Texture texture;
         Sprite sprite;
 
-        string mapString = "0000000000000000" +
-                           "0   0   0      0" +
-                           "0   0          0" +
-                           "0   0   0      0" +
-                           "0   0   0      0" +
-                           "0   0   0      0" +
-                           "0   0   0      0" +
-                           "00 000 000000000" +
-                           "0              0" +
-                           "0              0" +
-                           "0              0" +
-                           "0              0" +
-                           "0              0" +
-                           "0              0" +
-                           "0              0" +
-                           "0000000000000000";
-
-        int pack_color(byte r, byte g, byte b, byte a = 255)
+        public MapEffect() : base("MapTestEffect")
         {
-            return (a << 24) + (b << 16) + (g << 8) + r;
-        }
-
-        Tuple<byte, byte, byte, byte> unpack_color(int color)
-        {
-            return Tuple.Create<byte, byte, byte, byte>(
-                (byte)((color << 0) & 255),
-                (byte)((color << 8) & 255),
-                (byte)((color << 16) & 255),
-                (byte)((color << 24) & 255)
-            );
+            texture = new Texture(Game.Instance.Window.Size.X, Game.Instance.Window.Size.Y);
+            Vector2 cellSize = new Vector2(width / SquareMapSize, height / SquareMapSize);
+            int[] pixels = new int[width * height];
+            int cellId = 0;
+            for (int y = 0; y < SquareMapSize; y++)
+            {
+                for (int x = 0; x < SquareMapSize; x++)
+                {
+                    var cellColorId = map[cellId++];
+                    var cellColor = palette.AsSpan(cellColorId * 3, 3);
+                    drawRectangle(pixels, width, height, x * (int)cellSize.X, y * (int)cellSize.Y, (int)cellSize.X, (int)cellSize.Y, pack_color(cellColor[0], cellColor[1], cellColor[2]));
+                }
+            }
+            var bytes = new byte[width * height * 4];
+            Buffer.BlockCopy(pixels, 0, bytes, 0, bytes.Length);
+            texture.Update(bytes);
+            sprite = new Sprite(texture);
         }
 
         void drawRectangle(int[] img, int width, int height, int x, int y, int w, int h, int color)
@@ -53,38 +70,6 @@ namespace DoomFire
             }
         }
 
-        public MapEffect() : base("MapTestEffect")
-        {
-            texture = new Texture(Game.Instance.Window.Size.X, Game.Instance.Window.Size.Y);
-            int[] pixelData = new int[texture.Size.X * texture.Size.Y];
-            
-            var mapSize = Math.Sqrt(mapString.Length);
-            int rect_w = (int)(Game.Instance.Window.Size.X / mapSize);
-            int rect_h = (int)(Game.Instance.Window.Size.Y / mapSize);
-            int width = (int)Game.Instance.Window.Size.X;
-            int height = (int)Game.Instance.Window.Size.Y;
-
-            int mapStringId = 0;
-            for (int x = 0; x < mapSize; x++)
-            {
-                for (int y = 0; y < mapSize; y++)
-                {
-                    if (mapString.Substring(mapStringId++, 1) == "0")
-                        continue;
-                    byte r = (byte)(255 * x / texture.Size.X);
-                    byte g = (byte)(255 * y / texture.Size.Y);
-                    byte b = 0;
-                    int rect_X = x * rect_w;
-                    int rect_y = y * rect_h;
-                    drawRectangle(pixelData, width, height, rect_X, rect_y, rect_w, rect_h, pack_color(255, 255, b));
-                }
-            }
-            var byteBuffer = new byte[pixelData.Length * 4];
-            Buffer.BlockCopy(pixelData, 0, byteBuffer, 0, byteBuffer.Length);
-            texture.Update(byteBuffer);
-            sprite = new Sprite(texture);
-        }
-
         protected override void OnDraw(RenderTarget target, RenderStates states)
         {
             target.Draw(sprite, states);
@@ -92,7 +77,21 @@ namespace DoomFire
 
         protected override void OnUpdate(float time)
         {
+        }
 
+        int pack_color(byte r, byte g, byte b, byte a = 255)
+        {
+            return (a << 24) + (b << 16) + (g << 8) + r;
+        }
+
+        Tuple<byte, byte, byte, byte> unpack_color(int color)
+        {
+            return Tuple.Create<byte, byte, byte, byte>(
+                (byte)((color << 0) & 255),
+                (byte)((color << 8) & 255),
+                (byte)((color << 16) & 255),
+                (byte)((color << 24) & 255)
+            );
         }
     }
 }
