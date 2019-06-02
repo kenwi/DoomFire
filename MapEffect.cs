@@ -30,31 +30,71 @@ namespace DoomFire
             0xAB, 0xBB, 0xBB
         };
 
-        int SquareMapSize => (int)Math.Sqrt(map.Length);
-        int width => (int)Game.Instance.Window.Size.X;
-        int height => (int)Game.Instance.Window.Size.Y;
+        int[] pixels;
+        int MapSize => (int)Math.Sqrt(map.Length);
+        int windowWidth => (int)Game.Instance.Window.Size.X;
+        int windowHeight => (int)Game.Instance.Window.Size.Y;
+        Vector2 cellSize;
         Texture texture;
         Sprite sprite;
+
+        Vector2 playerPosition;
+        float playerDirection;
 
         public MapEffect() : base("MapTestEffect")
         {
             texture = new Texture(Game.Instance.Window.Size.X, Game.Instance.Window.Size.Y);
-            Vector2 cellSize = new Vector2(width / SquareMapSize, height / SquareMapSize);
-            int[] pixels = new int[width * height];
+            cellSize = new Vector2(windowWidth / MapSize, windowHeight / MapSize);
+            pixels = new int[windowWidth * windowHeight];
+
             int cellId = 0;
-            for (int y = 0; y < SquareMapSize; y++)
+            for (int y = 0; y < MapSize; y++)
             {
-                for (int x = 0; x < SquareMapSize; x++)
+                for (int x = 0; x < MapSize; x++)
                 {
                     var cellColorId = map[cellId++];
                     var cellColor = palette.AsSpan(cellColorId * 3, 3);
-                    drawRectangle(pixels, width, height, x * (int)cellSize.X, y * (int)cellSize.Y, (int)cellSize.X, (int)cellSize.Y, pack_color(cellColor[0], cellColor[1], cellColor[2]));
+                    drawRectangle(pixels, windowWidth, windowHeight, x * (int)cellSize.X, y * (int)cellSize.Y, (int)cellSize.X, (int)cellSize.Y, pack_color(cellColor[0], cellColor[1], cellColor[2]));
                 }
             }
-            var bytes = new byte[width * height * 4];
+            playerDirection = 3.1415f / 2;
+            playerPosition = new Vector2(MapSize / 4);
+            var l = raycast(playerPosition, playerDirection, true);
+            drawEntity(playerPosition, 5, pack_color(0, 0, 255));
+
+            var bytes = new byte[windowWidth * windowHeight * 4];
             Buffer.BlockCopy(pixels, 0, bytes, 0, bytes.Length);
             texture.Update(bytes);
             sprite = new Sprite(texture);
+        }
+
+        void setPixel(Vector2 position, int color)
+        {
+            int x = (int)(position.X * cellSize.X);
+            int y = (int)(position.Y * cellSize.Y);
+            int index = x + y * windowWidth;
+            pixels[index] = color;
+        }
+
+        float raycast(Vector2 position, float direction, bool render = false)
+        {
+            float step = 0.05f, length = 0;
+            for (float i = 0; i < 20; i += step)
+            {
+                var dx = position.X + i * Math.Cos(direction);
+                var dy = position.Y + i * Math.Sin(direction);
+                if (map[(int)dx + (int)dy * MapSize] != 0)
+                    break;
+                if (render)
+                    setPixel(new Vector2((float)dx, (float)dy), pack_color(255, 0, 0));
+                length += step;
+            }
+            return length;
+        }
+
+        void drawEntity(Vector2 position, int size, int color)
+        {
+            drawRectangle(pixels, windowWidth, windowHeight, (int)(position.X * cellSize.X) - size / 2, (int)(position.Y * cellSize.Y - size / 2), size, size, color);
         }
 
         void drawRectangle(int[] img, int width, int height, int x, int y, int w, int h, int color)
