@@ -59,7 +59,7 @@ namespace DoomFire
             }
             playerDirection = 3.1415f / 2;
             playerPosition = new Vector2(MapSize / 4);
-            var l = raycast(playerPosition, playerDirection, true);
+            raycast(playerPosition, playerDirection, true);
             drawEntity(playerPosition, 5, pack_color(0, 0, 255));
 
             var bytes = new byte[windowWidth * windowHeight * 4];
@@ -78,16 +78,15 @@ namespace DoomFire
 
         float raycast(Vector2 position, float direction, bool render = false)
         {
-            float step = 0.05f, length = 0;
-            for (float i = 0; i < 20; i += step)
+            float length, step = 0.05f;
+            for (length = 0; length < 20; length += step)
             {
-                var dx = position.X + i * Math.Cos(direction);
-                var dy = position.Y + i * Math.Sin(direction);
+                var dx = position.X + length * Math.Cos(direction);
+                var dy = position.Y + length * Math.Sin(direction);
                 if (map[(int)dx + (int)dy * MapSize] != 0)
                     break;
                 if (render)
                     setPixel(new Vector2((float)dx, (float)dy), pack_color(255, 0, 0));
-                length += step;
             }
             return length;
         }
