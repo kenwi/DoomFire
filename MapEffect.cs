@@ -78,8 +78,8 @@ namespace DoomFire
 
         float raycast(Vector2 position, float direction, bool render = false)
         {
-            float length, step = 0.05f;
-            for (length = 0; length < 20; length += step)
+            float length = 0, step = 0.05f;
+            for (; length < 20; length += step)
             {
                 var dx = position.X + length * Math.Cos(direction);
                 var dy = position.Y + length * Math.Sin(direction);
