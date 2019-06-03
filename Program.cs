@@ -7,7 +7,7 @@ namespace DoomFire
     {
         static void Main(string[] args)
         {
-            int targetfps = 10;
+            int targetfps = 60;
             float targetUpdateRate = 1f / targetfps;
 
             Game.Instance.Init();
