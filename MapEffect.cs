@@ -1,4 +1,5 @@
 using System;
+using SFML.Window;
 using SFML.Graphics;
 using System.Numerics;
 
@@ -47,6 +48,15 @@ namespace DoomFire
             cellSize = new Vector2(windowWidth / MapSize, windowHeight / MapSize);
             pixels = new int[windowWidth * windowHeight];
 
+            playerDirection = 3.1415f / 2;
+            playerPosition = new Vector2(MapSize / 4);
+
+            render();
+            updateFrame();
+        }
+
+        void render()
+        {
             int cellId = 0;
             for (int y = 0; y < MapSize; y++)
             {
@@ -57,11 +67,14 @@ namespace DoomFire
                     drawRectangle(pixels, windowWidth, windowHeight, x * (int)cellSize.X, y * (int)cellSize.Y, (int)cellSize.X, (int)cellSize.Y, pack_color(cellColor[0], cellColor[1], cellColor[2]));
                 }
             }
-            playerDirection = 3.1415f / 2;
-            playerPosition = new Vector2(MapSize / 4);
-            raycast(playerPosition, playerDirection, true);
-            drawEntity(playerPosition, 5, pack_color(0, 0, 255));
+            raycast(playerPosition, playerDirection - (float)Math.Sin(3.1415 / 180 * 30), true);
+            raycast(playerPosition, playerDirection + (float)Math.Sin(3.1415 / 180 * 30), true);
 
+            drawEntity(playerPosition, 5, pack_color(0, 0, 255));
+        }
+
+        void updateFrame()
+        {
             var bytes = new byte[windowWidth * windowHeight * 4];
             Buffer.BlockCopy(pixels, 0, bytes, 0, bytes.Length);
             texture.Update(bytes);
@@ -116,6 +129,39 @@ namespace DoomFire
 
         protected override void OnUpdate(float time)
         {
+            var rotationSpeed = 3.1415f * 2;
+            bool updated = false;
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Left))
+            {
+                playerDirection -= rotationSpeed * time;
+                updated = true;
+            }
+
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Right))
+            {
+                playerDirection += rotationSpeed * time;
+                updated = true;
+            }
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Up))
+            {
+                playerPosition.X += 0.1f * (float)Math.Cos(playerDirection);
+                playerPosition.Y += 0.1f * (float)Math.Sin(playerDirection);
+                updated = true;
+            }
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Down))
+            {
+                playerPosition.X -= 0.1f * (float)Math.Cos(playerDirection);
+                playerPosition.Y -= 0.1f * (float)Math.Sin(playerDirection);
+                updated = true;
+            }
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Escape))
+                Game.Instance.Window.Close();
+
+            if (updated)
+            {
+                render();
+                updateFrame();
+            }
         }
 
         int pack_color(byte r, byte g, byte b, byte a = 255)
